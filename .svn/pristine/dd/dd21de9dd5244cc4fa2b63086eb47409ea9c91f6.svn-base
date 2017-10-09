@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	
+<!-- 订单包 -->
+    <package name="orderAjax" namespace="/" extends="default">  
+<!-- 添加订单         -->        
+        <action name="addOrder" class="com.xyy.ajax.action.OrderAction" method="addOrder">
+            <result name="success" type="json"/>
+        </action>
+<!-- 订单列表（展示类）        -->        
+        <action name="orderShow" class="com.xyy.ajax.action.OrderAction" method="orderShow">
+            <result name="success" type="json"/>
+        </action>
+<!-- 支付订单,不返回订单        -->        
+<!--         <action name="payOrder" class="com.xyy.ajax.action.OrderAction" method="payOrder"> -->
+<!--             <result name="success" type="json"/> -->
+<!--         </action>    -->
+
+<!-- 支付订单1,返回订单        -->        
+        <action name="payOrderTwo" class="com.xyy.ajax.action.OrderAction" method="payOrderTwo">
+            <result name="success" type="json"/>
+        </action>   
+
+
+
+<!-- 删除订单         -->        
+        <action name="deleteOrder" class="com.xyy.ajax.action.OrderAction" method="deleteOrder">
+            <result name="success" type="json"/>
+        </action>            
+    </package>
+</struts>

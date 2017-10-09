@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+
+<!-- Ajax购物车包 -->
+    <package name="shopItemAjax" namespace="/" extends="default">     
+<!-- 添加商品到购物车之方式一 ：     -->           
+        <action name="addShopItem" class="com.xyy.ajax.action.ShopItemAction" method="addShopItem">
+            <result name="success" type="json"/>
+        </action>
+<!-- 添加商品到购物车之方式二 ：     -->           
+        <action name="addShopItemTwo" class="com.xyy.ajax.action.ShopItemAction" method="addShopItemTwo">
+            <result name="success" type="json"/>
+        </action>
+<!-- 把商品从购物车中减少      -->           
+        <action name="reduceShopItem" class="com.xyy.ajax.action.ShopItemAction" method="reduceShopItem">
+            <result name="success" type="json"/>
+        </action>  
+<!-- 获取购物车总数量      -->           
+        <action name="shopTotalCount"  class="com.xyy.ajax.action.ShopItemAction" method="shopTotalCount">
+            <result name="success" type="json"/>
+        </action>
+<!-- 获取购物车总数量      -->           
+        <action name="shopCarShow"  class="com.xyy.ajax.action.ShopItemAction" method="shopCarShow">
+            <result name="success" type="json"/>
+        </action>
+<!-- 准备生成订单      -->           
+        <action name="createOrder"  class="com.xyy.ajax.action.ShopItemAction" method="createOrder">
+            <result name="success" type="json"/>
+        </action>
+<!-- 跳转到订单      -->           
+        <action name="shopCarToOrder"  class="com.xyy.ajax.action.ShopItemAction" method="shopCarToOrder">
+            <result name="success" type="dispatcher">/ajaxViewShop/orderShow.html</result>
+        </action> 
+<!-- 移除整个购物项      -->           
+        <action name="delete"  class="com.xyy.ajax.action.ShopItemAction" method="delete">
+            <result name="success" type="json"/>
+        </action>             
+    </package>
+</struts>

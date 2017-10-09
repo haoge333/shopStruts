@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+
+<!-- Ajax商品包 -->
+    <package name="shoppingAjax" namespace="/" extends="default">     
+<!-- Ajax展示商品        -->           
+        <action name="ajaxShopping" class="com.xyy.ajax.action.ShopAjaxAction" method="ajaxShopping">
+            <result name="success" type="json"/>
+        </action> 
+<!-- AJAX查询商品          -->
+		<action name="ajaxFindShop" class="com.xyy.ajax.action.ShopAjaxAction" method="findShoppingById">
+            <result name="success" type="json"/>
+        </action> 
+    </package>
+</struts>

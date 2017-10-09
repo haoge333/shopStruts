@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+
+<!-- 商品包 -->
+    <package name="shopping" namespace="/" extends="default">
+<!-- 自定义的拦截器栈 -->
+    <interceptors>
+			<interceptor name="loginInterception" class="com.xyy.interception.LoginInterception"/>	
+    		<interceptor-stack name="myStack">
+    			<interceptor-ref name="loginInterception"></interceptor-ref>
+    			<interceptor-ref name="defaultStack"></interceptor-ref>
+    		</interceptor-stack>
+	</interceptors>
+    <global-results>
+    	<result name="pleaseLogin">/WEB-INF/view/user/loginForm.jsp</result>
+    </global-results>
+ 
+<!-- 商品列表         -->
+        <action name="listShopping" class="com.xyy.action.ShopAction" method="listShopping">
+       		<interceptor-ref name="myStack"/>
+       		<result name="success">/WEB-INF/view/shopping/listShopping.jsp</result>
+        </action>
+<!-- 添加商品之出现添加表单         -->
+        <action name="addShoppingForm" class="com.xyy.action.ShopAction" method="addShoppingForm">
+            <interceptor-ref name="myStack"/>
+            <result name="success">/WEB-INF/view/shopping/addShopping.jsp</result>
+        </action>
+<!-- 添加商品         -->
+        <action name="addShopping" class="com.xyy.action.ShopAction" method="addShopping">
+            <interceptor-ref name="myStack"/>
+            <result name="success" type="redirectAction">listShopping</result>
+        </action>
+<!-- 根据id删除商品信息         -->           
+        <action name="deleteShopping" class="com.xyy.action.ShopAction" method="deleteShopping">
+            <interceptor-ref name="myStack"/>
+            <result name="success" type="chain">listShopping</result>
+        </action>        
+<!-- 修改商品操作之修改表单出现         -->           
+        <action name="updateShopping" class="com.xyy.action.ShopAction" method="findShoppingById">
+           	<interceptor-ref name="myStack"/>
+            <result name="success" type="dispatcher">/WEB-INF/view/shopping/updateShopping.jsp</result>
+        </action>        
+<!-- 修改商品         -->           
+        <action name="updateShoppingInfo" class="com.xyy.action.ShopAction" method="updateShopping">
+            <interceptor-ref name="myStack"/>
+            <result name="success" type="redirectAction">listShopping</result>
+        </action>
+<!-- 由listShopping转到Ajax        -->           
+        <action name="listToAjax" class="com.xyy.action.ShopAction" method="listToAjax">
+            <interceptor-ref name="myStack"/>
+            <result name="success" type="dispatcher">/ajaxViewShop/listShopping.html</result>
+        </action>
+    </package>
+</struts>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>主页</title>
+<link href="/shopStruts/js/bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+.addressDiv {
+	margin: 2px;
+	float: left;
+	padding: 5px;
+	width: 200px;
+	higth: 340px;
+}
+
+img {
+	width: 60px;
+	height: 56px;
+	overflow: hidden;
+}
+img:hover {
+	transform: scale(1.02);
+}
+</style>
+</head>
+<body>
+<!-- 导航菜单,表头 -->
+<div class="container" style="margin-bottom:53px">
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="padding-lefe:30px;padding-right:30px">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="#">小商店管理系统</a>
+		</div>
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li><a href="${pageContext.request.contextPath}/addShoppingForm">添加商品</a></li>
+				<li><a href="${pageContext.request.contextPath}/pageUser">客户列表</a></li>
+				<li><a href="/shopStruts/ajaxViewShop/listShopping.html">商品列表</a></li>
+	   	  		<li><a href="/shopStruts/ajaxViewShop/shopCar.html">购物车[<b id="shopCarCount"></b>]</a></li>
+	   	  		<li><a href="/shopStruts/ajaxViewShop/orderShow.html">我的订单</a></li>
+			</ul>
+			<form class="navbar-form navbar-left" role="search">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="请输入查询索引信息">
+				</div>
+				<button type="submit" class="btn btn-default" >查询</button>
+			</form>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="#">欢迎 <span style="color: red"></span>登录 </a></li>
+				<li class="dropdown"><a href="user?method=quitUser">退出系统</a></li>
+			</ul>
+		</div>
+	</nav>
+</div>
+
+
+<!-- 地址详情模态框 -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:800px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">请选择收货地址</h4>
+      </div>
+      
+      <div class="modal-body" id="addressModal">
+      </div>
+      <div style="clear: both;"></div> 
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" onclick="createOrder()">确定</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- 准订单模态框展示 -->
+<div class="modal fade" id="ordModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:600px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">请确认购买信息</h4>
+      </div>
+      <div class="modal-body" id="orderModal">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">支付</button>
+        <button type="button" class="btn btn-primary" onclick="saveOrder()">确认</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal --> 
+    
+<!-- 购物车商品展示区 -->	                                                
+<div  class="container text-center">
+	<table class="table table-hover text-center table-bordered" style="background: #eee">
+			<thead>
+				<tr>
+					<th class="text-center">选择</th>
+					<th class="text-center">名称</th>
+					<th class="text-center">图片</th>
+					<th class="text-center">品牌</th>
+					<th class="text-center">数量</th>
+					<th class="text-center">总价</th>
+					<th class="text-center">操作</th>
+				</tr>
+			</thead>
+			<tbody id="tbody">
+			</tbody>
+		</table>
+</div>
+<script src="/shopStruts/js/jquery.min.js"></script>
+<script src="/shopStruts/js/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	$(function(){
+		showShopCar();
+		getShopTotal();
+	});
+</script>
+<!-- 生成购物车商品 -->
+<script type="text/javascript">
+	function showShopCar() {
+		$.post("/shopStruts/shopCarShow",function(datas) {
+			var data = JSON.parse(datas.result);
+			for (var i = 0; i < data.length; i++){
+				var tr = '<tr>'
+						+ '<td><input type="checkbox"></td>'
+						+ '<td>'+ data[i].shoppingName+ '</td>'
+						+ '<td><img src="/shopStruts/image/'+ data[i].shopping.imgsFileName+'"></td>'
+						+ '<td>'+ data[i].shopping.brand+ '</td>'
+						+ '<td><button type="button" onclick="reduce(this,'+ data[i].shoppingId+ ')">-</button>'
+						+ '<span>'+data[i].shopNumber+'</span>'
+						+ '<button type="button" onclick="add(this,'+ data[i].shoppingId+ ')">+</button></td>'
+						+ '<td id="totalPrice">'+ (data[i].discountPrice)*(data[i].shopNumber)+ '</td>'
+						+ '<td><button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteShopItem('+data[i].id+')">移除</button>'
+						+ '<button type="button" class="btn btn-default" data-dismiss="modal" onclick="balance('+data[i].id+')">结算</button>'
+						+ '</td>' + '</tr>';
+				$("#tbody").append(tr);
+			};
+		});
+	}
+</script>
+<!-- 商品数量的增加与减少 -->
+<script type="text/javascript">
+// 增加:方式1：增加后，调用showShopCar()方法，从数据库拿回数据重新加载展示
+// 	function add(object,shoppingId){
+// 		var span = $(object).closest("tr").find("span");
+// 		$.post("/shopStruts/addShopItem",{"shopItem.shoppingId":shoppingId},function(data){
+// 			if("ok"==data.result){
+// 				$("#tbody").empty();
+// 				showShopCar();
+//  				getShopTotal();
+// 			}
+// 		});
+// 	}
+// 增加:方式2：增加后，返回购物项，获取数量和价格，计算总价，替换掉原来的总价，不必加载整个页面
+	function add(object,shoppingId){
+		var span = $(object).closest("tr").find("span");
+		$.post("/shopStruts/addShopItemTwo",{"shopItem.shoppingId":shoppingId},function(data){
+			var shopItem=JSON.parse(data.result);
+			var td=$(object).parent().parent().find("td[id]");
+			var price=(shopItem.shopNumber)*(shopItem.discountPrice);  //总价
+			span.text(Number(span.text())+1);           //改变数量；
+			td.html(price);                             //改变价格
+			getShopTotal();                             //获取总数量
+		});
+	}	
+	
+	
+// 减少
+	function reduce(object,shoppingId){
+		var span = $(object).closest("tr").find("span");
+		$.post("/shopStruts/reduceShopItem",{"shopItem.shoppingId":shoppingId},function(data){
+			if("ok"==data.result){
+				$("#tbody").empty();
+				showShopCar();
+				getShopTotal();
+			}
+		});
+	}	
+	//获取购物车总数量
+	function getShopTotal(){
+		$.post("/shopStruts/shopTotalCount",function(data){
+			var shopCout=data.result;
+			$("#shopCarCount").text(shopCout);
+		});
+	}
+	
+	
+//移除购物车商品	
+	function deleteShopItem(shopItemID){
+		$.post("/shopStruts/delete",{"shopItem.id":shopItemID},function(data){
+			if("ok"==data.result){
+				$("#tbody").empty();
+				showShopCar();
+				getShopTotal();
+			}
+		});
+	}
+</script>
+
+<!-- 结算环节 -->
+<script type="text/javascript">
+//点击结算时弹出地址模态框，选择地址
+	function balance(shopItemID){
+		localStorage.shopItemId=shopItemID;
+		$.post("/shopStruts/listAddress",function(datas){
+			var data=JSON.parse(datas.result);
+			$("#addressModal").empty();	
+			for(var i=0;i<data.length;i++){	
+				var div = '<div class="addressDiv">'
+								+'<p><input type="checkbox" value='+data[i].id+'></p>'
+								+'<p><b>用户名:'+data[i].user.name+ '</b></p>'
+								+'<p><b>地址: </b>'+data[i].addressName+'</p>'
+								+'<p><b>电话: </b>'+data[i].phone+'</p>'
+								+'<p><b>邮编: </b>'+data[i].post+'</p>'
+								+ '</div>';
+				$("#addressModal").append(div);
+			};
+			$("#addModal").modal('show');
+		});
+	}
+//地址模态框确认按钮时，生产订单
+	function createOrder(){
+		var addressId=$("input:checked").val();
+		localStorage.addressId=addressId;                //地址id
+		var shopItemId=localStorage.shopItemId;
+		object={"shopItemDto.address.id":addressId,
+				"shopItem.id":shopItemId};
+		$.post("/shopStruts/createOrder",object,function(data){
+			var data =JSON.parse(data.result);
+			localStorage.userId=data.user.id;              //客户id
+			localStorage.totalPrice=(data.discountPrice)*(data.shopNumber);      //总价
+			var div = '<div class="orderDiv">'
+						+'<p><img  style="width:180px;height:180px"  src="/shopStruts/image/'+ data.shopping.imgsFileName+'"></p>'
+						+'<p>商品名称:<b>:'+data.shoppingName+ '</b></td>'
+						+'<p>商品品牌:<b>'+ data.shopping.brand+ '</b></td>'
+						+'<p>购买数量:<b>'+data.shopNumber+'</b></td>'
+						+'<p>总价:<b>￥'+ (data.discountPrice)*(data.shopNumber)+ '</b></td>'
+						+'<p>收获人:<b>'+data.user.name+'</b></td>'
+						+'<p>收获地址:<b>'+data.address.addressName+'</b></td>'
+						+'<p>电话:<b>'+data.address.phone+'</b></td>'
+						+'<p>邮编:<b>'+data.address.post+'</b></td>'
+						+ '</div>';
+			$("#orderModal").empty();	
+			$("#orderModal").append(div);
+		});
+		$("#addModal").modal('hide');
+		setTimeout(function(){
+			$("#ordModal").modal('show');
+		}, 200);	
+}
+</script>
+<!-- 购买信息确认时，生成订单，保存到t_oeder数据表中 -->
+<script type="text/javascript">
+	function saveOrder(){
+		var addressId=localStorage.addressId;        //地址id
+		var userId=localStorage.userId;              //客户id
+		var totalPrice=localStorage.totalPrice;      //总价
+		var shopItemId=localStorage.shopItemId;      //购物项目id
+		object={"order.userId":userId,
+				"order.addressId":addressId,
+				"order.totalPrice":totalPrice,
+				"shopItem.id":shopItemId};
+		
+		$.post("/shopStruts/addOrder",object,function(data){
+			if("ok"==data.result){
+				alert("订单已经生成,请在[我的订单]中查看");
+				setTimeout(function(){
+					$("#ordModal").modal('hide');	
+				}, 300);
+				setTimeout(function(){
+					$("#tbody").empty();
+					showShopCar();
+					getShopTotal();
+				}, 400);
+			}
+		});
+	}
+</script>
+</body>
+</html>

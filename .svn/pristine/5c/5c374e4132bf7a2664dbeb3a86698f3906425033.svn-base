@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>主页</title>
+<link href="/shopStruts/js/bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+.li {
+	margin: 2px;
+	float: left;
+	padding: 5px;
+	width: 270px;
+	higth: 340px;
+	list-style: none;
+	cursor: pointer;
+	overflow: hidden;
+	background: rgba(86,61,124,0.4);
+}
+
+.li img {
+	width: 200px;
+	height: 198px;
+	overflow: hidden;
+}
+
+.li img:hover {
+	transform: scale(1.02);
+}
+
+#modalImg {
+	width: 360px;
+}
+
+#ul{
+	list-style: none;
+}
+</style>
+</head>
+<body>
+<!-- 导航菜单,表头 -->
+<div class="container" style="margin-bottom:53px">
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="padding-lefe:30px;padding-right:30px">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="#">小商店管理系统</a>
+		</div>
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li><a href="${pageContext.request.contextPath}/addShoppingForm">添加商品</a></li>
+				<li><a href="${pageContext.request.contextPath}/pageUser">客户列表</a></li>
+				<li><a href="/shopStruts/ajaxViewShop/listShopping.html">商品列表</a></li>
+	   	  		<li><a href="/shopStruts/ajaxViewShop/shopCar.html">购物车[<b id="shopCarCount"></b>]</a></li>
+	   	  		<li><a href="/shopStruts/ajaxViewShop/orderShow.html">我的订单</a></li>
+			</ul>
+			<form class="navbar-form navbar-left" role="search">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="请输入查询索引信息">
+				</div>
+				<button type="submit" class="btn btn-default" >查询</button>
+			</form>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="#">欢迎 <span style="color: red"></span>登录 </a></li>
+				<li class="dropdown"><a href="user?method=quitUser">退出系统</a></li>
+			</ul>
+		</div>
+	</nav>
+</div>    
+<!-- 商品主要展示区 -->	                                                
+<div class="container">
+	<ul class="ul"></ul>
+</div>
+<!-- 商品详情模态框 -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">商品详细信息</h4>
+      </div>
+      <div class="modal-body" id="shopModal">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" onclick="addToShopCar()">加入购物车</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script src="/shopStruts/js/jquery.min.js"></script>
+<script src="/shopStruts/js/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+<!-- 需要启动加载的函数 -->
+<script type="text/javascript">
+	$(function(){
+		listShopping();
+		getShopTotal();
+	})
+</script>
+<!-- 根据后台返回的数组自动增加产品信息 -->
+<script type="text/javascript">
+	function listShopping(){
+		$.post("/shopStruts/ajaxShopping",function(datas){
+			var data=JSON.parse(datas.result);
+			for(var i=0;i<data.length;i++){	
+				var li = '<li class="li"  onclick="goToDetail(' + data[i].id + ');">'
+								+'<img  class="img-rounded"  src="/shopStruts/image/'+ data[i].imgsFileName+'">'
+								+ '<div>'
+									+ '<p class="more_info_name">'
+										+ data[i].name
+									+ '</p>'
+									+ '<p class="J_more_info_price more_info_price mod_price">'
+										+ '<i>¥</i><span class="more_info_price_txt">'+ data[i].price + '</span>' 
+									+ '</p>'
+								+ '</div>' 
+								+ '</li>';
+				$(".ul").append(li);
+			};
+		});
+	}
+</script>
+<!-- 使用模态框展示商品详细信息 -->
+<script type="text/javascript">
+	function goToDetail(id){
+		localStorage.shoppingId = id;    //用于加入购物车使用
+		$.post("/shopStruts/ajaxFindShop",{"shopping.id":id},function(data){
+			var shop=JSON.parse(data.result);
+			var ul = '<ul id="ul">' 
+						+'<img id="modalImg" class="img-rounded" src="/shopStruts/image/'+ shop.imgsFileName+'">'
+						+ '<li>名称：'+ shop.name + '</li>' 
+						+ '<li>价格：' + shop.price+ '</li>' 
+						+ '<li>品牌：' + shop.brand + '</li>'
+						+ '<li>生产日期：' + shop.createDate + '</li>' 
+						+ '<li>商品描述：' + shop.description + '</li>' 
+				    + '</ul>';
+			$("#shopModal").empty();  
+			$("#shopModal").append(ul);    
+		});
+		setTimeout(function(){
+			$('#myModal').modal('show');
+		}, 200);			
+	}
+</script>
+<!-- 购物车系列操作 -->
+<script type="text/javascript">
+	//加入购物车
+	function addToShopCar(){
+		var shopId=localStorage.shoppingId;
+		$.post("/shopStruts/addShopItem",{"shopItem.shoppingId":shopId},function(data){
+			if("ok"==data.result){
+				getShopTotal();
+				alert("已成功加入购物车");
+				setTimeout(function(){
+					$("#myModal").modal('hide')
+				}, 200);
+			}
+		});
+	}
+	//获取购物车总数量
+	function getShopTotal(){
+		$.post("/shopStruts/shopTotalCount",function(data){
+			var shopCout=data.result;
+			$("#shopCarCount").text(shopCout);
+		});
+	}
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+<!-- 设置常量 -->
+	<constant name="struts.i18n.encoding" value="UTF-8"></constant>
+	<constant name="struts.action.extension" value="action,,"></constant>
+	<constant name="struts.devMode" value="true"></constant>
+	<constant name="struts.configuration.xml.reload" value="true"></constant>
+	<constant name="struts.serve.static.browserCache" value="false"></constant>
+	<constant name="struts.multipart.maxSize" value="8888888888"/>
+	
+<!-- 主包-->
+    <package name="default" namespace="/" extends="json-default">
+<!-- 自定义的拦截器栈 -->
+    <interceptors>
+			<interceptor name="loginInterception" class="com.xyy.interception.LoginInterception"/>	
+    		<interceptor-stack name="myStack">
+    			<interceptor-ref name="loginInterception"></interceptor-ref>
+    			<interceptor-ref name="defaultStack"></interceptor-ref>
+    		</interceptor-stack>
+	</interceptors>
+    <global-results>
+    	<result name="pleaseLogin">/WEB-INF/view/user/loginForm.jsp</result>
+    </global-results>
+    </package>
+    
+<!-- 引入的用户包 -->    
+    <include file="user.xml"/>
+<!-- 引入的商品包 -->
+    <include file="shopping.xml"/>
+<!-- 引入的商品Ajax包 -->      
+    <include file="shoppingAjax.xml"/>
+<!-- 引入的购物项Ajax包 -->      
+    <include file="shopItemAjax.xml"/>
+<!-- 引入地址的Ajax包 -->      
+    <include file="addressAjax.xml"/>
+<!-- 引入订单的Ajax包 -->      
+    <include file="orderAjax.xml"/>          
+</struts>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>主页</title>
+<link href="/shopStruts/js/bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+.addressDiv {
+	margin: 2px;
+	float: left;
+	padding: 5px;
+	width: 200px;
+	higth: 340px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- 导航菜单,表头 -->
+<div class="container" style="margin-bottom:53px">
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="padding-lefe:30px;padding-right:30px">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="#">小商店管理系统</a>
+		</div>
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li><a href="${pageContext.request.contextPath}/addShoppingForm">添加商品</a></li>
+				<li><a href="${pageContext.request.contextPath}/pageUser">客户列表</a></li>
+				<li><a href="/shopStruts/ajaxViewShop/listShopping.html">商品列表</a></li>
+	   	  		<li><a href="/shopStruts/ajaxViewShop/shopCar.html">购物车[<b id="shopCarCount"></b>]</a></li>
+	   	  		<li><a href="/shopStruts/ajaxViewShop/orderShow.html">我的订单</a></li>
+			</ul>
+			<form class="navbar-form navbar-left" role="search">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="请输入查询索引信息">
+				</div>
+				<button type="submit" class="btn btn-default" >查询</button>
+			</form>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="#">欢迎 <span style="color: red"></span>登录 </a></li>
+				<li class="dropdown"><a href="user?method=quitUser">退出系统</a></li>
+			</ul>
+		</div>
+	</nav>
+</div>
+
+<!-- 订单展示区 -->	                                                
+<div  class="container text-center">
+	<table class="table table-hover text-center table-bordered" style="background: #eee">
+			<thead>
+				<tr>
+					<th class="text-center">选择</th>
+					<th class="text-center">订单编号</th>
+					<th class="text-center">交易流水号</th>
+					<th class="text-center">总价</th>
+					<th class="text-center">收货人</th>
+					<th class="text-center">收货地址</th>
+					<th class="text-center">收货电话</th>
+					<th class="text-center">订单日期</th>
+					<th class="text-center">订单状态</th>
+					<th class="text-center">操作</th>
+				</tr>
+			</thead>
+			<tbody id="tbody">
+			</tbody>
+		</table>
+</div>
+<script src="/shopStruts/js/jquery.min.js"></script>
+<script src="/shopStruts/js/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	$(function(){
+		showShopCar();	
+		getShopTotal();
+	});
+</script>
+<!-- 列表展示订单 -->
+<script type="text/javascript">
+	function showShopCar() {
+		$.post("/shopStruts/orderShow",function(datas) {
+			var data = JSON.parse(datas.result);
+			for (var i = 0; i < data.length; i++){
+				var tr = '<tr>'
+						+ '<td><input type="checkbox"></td>'
+						+ '<td>'+data[i].id+'</td>'
+						+ '<td><span>'+data[i].orderNumber+'</span></td>'
+						+ '<td>'+data[i].totalPrice+ '</td>'
+						+ '<td>'+data[i].user.name+ '</td>'
+						+ '<td>'+data[i].address.addressName+'</td>'
+						+ '<td>'+data[i].address.phone+'</td>'
+						+ '<td>'+data[i].orderDate+'</td>'
+						+ '<td id="status">'+data[i].status+'</td>'
+						+ '<td><button onclick="deleteOrder('+data[i].id+',this)">删除</button>&nbsp&nbsp'
+							 +'<button onclick="payOrder('+data[i].id+',this)">支付</button></td>'
+					    + '</tr>';
+				$("#tbody").append(tr);
+			};
+		});
+	}
+</script>
+<!-- 订单操作：支付/取消/删除 -->
+<script type="text/javascript">
+//支付订单
+//方式一：修改数据库，然后重新从数据库加载数据展示在页面
+// 	function payOrder(orderId,object){
+// 		 $.post("/shopStruts/payOrder",{"order.id":orderId},function(data) {
+// 	 		if("ok"==data.result){
+// 	 			$("#tbody").empty();
+// 	 			showShopCar();			
+//  			};
+// 		 });
+
+//方式二：修改数据库，拿回修改的值，把修改的值贴在修改的地方，不用重新加载整个数据库	
+	function payOrder(orderId,object){
+ 		$.post("/shopStruts/payOrderTwo",{"order.id":orderId},function(data) {
+ 			var dat=JSON.parse(data.result);
+ 			var span = $(object).closest("tr").find("span");
+ 			var td=$(object).closest("tr").find("td[id]")
+ 			span.text(dat.orderNumber);              //增加流水号
+ 			td.html(dat.status);                     //改变订单状态
+ 		});
+ 	}
+//删除订单 	
+	function deleteOrder(orderId,object){
+ 		$.post("/shopStruts/deleteOrder",{"order.id":orderId},function(data) {
+ 			if("ok"==data.result){
+ 				$(object).parent().parent().remove();
+ 			}
+ 		});
+ 	}
+</script>
+
+<script type="text/javascript">
+	//获取购物车总数量
+	function getShopTotal(){
+		$.post("/shopStruts/shopTotalCount",function(data){
+			var shopCout=data.result;
+			$("#shopCarCount").text(shopCout);
+		});
+	}
+</script>
+</body>
+</html>

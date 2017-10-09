@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	
+<!-- 用户包 -->
+    <package name="user" namespace="/" extends="default">
+<!-- 自定义的拦截器栈 -->
+    <interceptors>
+			<interceptor name="loginInterception" class="com.xyy.interception.LoginInterception"/>	
+    		<interceptor-stack name="myStack">
+    			<interceptor-ref name="loginInterception"></interceptor-ref>
+    			<interceptor-ref name="defaultStack"></interceptor-ref>
+    		</interceptor-stack>
+	</interceptors>
+    <global-results>
+    	<result name="pleaseLogin">/WEB-INF/view/user/loginForm.jsp</result>
+    </global-results>
+     
+<!--  首次访问url为"loginForm",然后跳转到登录界面 -->
+        <action name="loginForm" class="com.xyy.action.UserAction" method="loginForm">
+            <result name="success">/WEB-INF/view/user/loginForm.jsp</result>
+        </action>
+<!-- "login"为登录表达的发送地址，如果成功则跳转到listShopping，进行下一步操作 -->     
+        <action name="login" class="com.xyy.action.UserAction" method="login">
+            <result name="success" type="redirectAction">pageUser</result>
+            <result name="error">/WEB-INF/view/user/loginForm.jsp</result>
+        </action>    
+<!-- 用户信息列表         -->        
+        <action name="listUser" class="com.xyy.action.UserAction" method="listUser">
+        	<interceptor-ref name="myStack"/>
+            <result name="success">/WEB-INF/view/user/listUser.jsp</result>
+        </action>
+<!-- 用户信息分页         -->        
+        <action name="pageUser" class="com.xyy.action.UserAction" method="pageUser">
+      		<interceptor-ref name="myStack"/>
+            <result name="success">/WEB-INF/view/user/pageUser.jsp</result>
+        </action>
+<!-- 修改用户操作之修改表单出现         -->           
+        <action name="updateUser" class="com.xyy.action.UserAction" method="findUserById">
+            <interceptor-ref name="myStack"/>
+            <result name="success" type="dispatcher">/WEB-INF/view/user/updateUser.jsp</result>
+        </action>
+<!-- 根据修改的参数开始修改信息         -->           
+        <action name="updateInfo" class="com.xyy.action.UserAction" method="updateUser">
+            <interceptor-ref name="myStack"/>
+            <result name="success" type="chain">pageUser</result>
+        </action>
+<!-- 根据id删除用户信息         -->           
+        <action name="deleteUser" class="com.xyy.action.UserAction" method="deleteUserById">
+            <interceptor-ref name="myStack"/>
+            <result name="success" type="chain">pageUser</result>
+        </action>
+<!-- 添加客户信息之出现添加表单         -->           
+        <action name="addUserForm" class="com.xyy.action.UserAction" method="addUserForm">
+           	<interceptor-ref name="myStack"/>
+            <result name="success">/WEB-INF/view/user/addUser.jsp</result>
+        </action>
+<!-- 添加客户信息         -->     
+        <action name="addUser" class="com.xyy.action.UserAction" method="addUser">
+            <interceptor-ref name="myStack"/>
+            <result name="success" type="redirectAction">pageUser</result>
+        </action>
+    </package>
+</struts>
